@@ -1,0 +1,357 @@
+---------------------------------------------------------------------
+-- Constants, might be useful:
+const
+  MAX_NOF_ANOMALIES:int = 100;
+  NOF_TICKS_ANOMALY:int = 2;
+  MAX_INT:int = 4096;
+  MAX_SPEED:real = 7.0;
+
+
+---------------------------------------------------------------------
+-- This is a warm-up. Likely, you will not use this component later.
+-- IMPLEMENT ME
+-- TASK L0
+node Rev(mag:bool) returns (rev:bool);
+let
+  rev = mag-> if mag and not pre(mag) then true
+	      else false;
+tel
+
+
+---------------------------------------------------------------------
+-- IMPLEMENT ME
+-- TASK L1
+node RevA(mag,tick:bool) returns (rev,anomaly:bool);
+var
+  count: int;
+let
+  count = 0 -> if tick then pre(count) + 1
+               else if mag then 0
+		else pre(count);
+  rev = mag -> if mag and pre(count) > (NOF_TICKS_ANOMALY-1) then true
+	       else if pre(mag) then false
+	       else if anomaly then false
+	       else mag;
+  anomaly = false -> if mag and pre(count)=(NOF_TICKS_ANOMALY-1) then true
+		     else false;
+tel
+
+
+---------------------------------------------------------------------
+-- IMPLEMENT ME
+-- TASK L2
+node FailureDetector(fr,rr:bool) returns (f_fail,r_fail:bool);
+var
+  checkF: bool;
+  checkR: bool;
+  once: bool;
+  alreadyCheck: bool;
+let
+  checkF = false -> if fr then true
+                    else if rr then false
+		    else pre checkF;
+  once = false -> if rr or fr then true
+                   else pre once;
+  checkR = false -> if rr then true
+		    else if fr then false
+		    else pre checkR;
+  alreadyCheck = false -> if pre f_fail or pre r_fail then true
+			  else pre alreadyCheck;
+  f_fail = false -> if rr and not pre checkF and not alreadyCheck and pre once then true
+		    else pre(f_fail);
+  r_fail = false -> if fr and not pre checkR and not alreadyCheck and pre once then true
+		    else pre(r_fail);
+
+tel
+
+node Verify_FailureDetector(fr,rr:bool) returns (f_fail,r_fail:bool; ok: bool);
+var
+  checkF: bool;
+  checkR: bool;
+  once: bool;
+  alreadyCheck: bool;
+let
+  checkF = false -> if fr then true
+                    else if rr then false
+		    else pre checkF;
+  once = false -> if rr or fr then true
+                   else pre once;
+  checkR = false -> if rr then true
+		    else if fr then false
+		    else pre checkR;
+  alreadyCheck = false -> if pre f_fail or pre r_fail then true
+			  else pre alreadyCheck;
+  f_fail = false -> if rr and not pre checkF and not alreadyCheck and pre once then true
+		    else pre(f_fail);
+  r_fail = false -> if fr and not pre checkR and not alreadyCheck and pre once then true
+		    else pre(r_fail);
+  ok = not (f_fail and r_fail);
+--%PROPERTY ok;
+
+tel
+
+node Verify_FailureDetector2(fr,rr:bool) returns (f_fail,r_fail:bool; ok: bool);
+var
+  checkF: bool;
+  checkR: bool;
+  once: bool;
+  alreadyCheck: bool;
+let
+  checkF = false -> if fr then true
+                    else if rr then false
+		    else pre checkF;
+  once = false -> if rr or fr then true
+                   else pre once;
+  checkR = false -> if rr then true
+		    else if fr then false
+		    else pre checkR;
+  alreadyCheck = false -> if pre f_fail or pre r_fail then true
+			  else pre alreadyCheck;
+  f_fail = false -> if rr and not pre checkF and not alreadyCheck and pre once then true
+		    else pre(f_fail);
+  r_fail = false -> if fr and not pre checkR and not alreadyCheck and pre once then true
+		    else pre(r_fail);
+  ok = true -> if pre(f_fail) and not f_fail then false
+	else if pre(r_fail) and not r_fail then false
+	else true;
+--%PROPERTY ok;
+
+tel
+---------------------------------------------------------------------
+-- IMPLEMENT ME
+-- Task L3
+node Alarm(fr,fa,rr,ra:bool) returns (alarm:int; f_ok,r_ok: bool);
+var
+	countAna: int;
+	isFrontFail, isRearFail: bool;
+let
+  	countAna = 0 -> if fa or ra then pre(countAna) + 1
+			else pre(countAna);
+	(isFrontFail, isRearFail) = FailureDetector(fr,rr);
+	f_ok = true -> if isFrontFail then false
+			else pre f_ok;
+	r_ok = true -> if isRearFail then false
+			else pre r_ok;
+	alarm = 0 -> if f_ok xor r_ok then 2
+		     else if countAna >= NOF_TICKS_ANOMALY then 1
+		     else pre(alarm);
+tel
+
+node AlarmInitally(fr,fa,rr,ra:bool) returns (alarm:int; f_ok,r_ok: bool ; ok:bool);
+var
+	countAna: int;
+	isFrontFail, isRearFail: bool;
+let
+  	countAna = 0 -> if fa or ra then pre(countAna) + 1
+			else pre(countAna);
+	(isFrontFail, isRearFail) = FailureDetector(fr,rr);
+	f_ok = true -> if isFrontFail then false
+			else pre f_ok;
+	r_ok = true -> if isRearFail then false
+			else pre r_ok;
+	alarm = 0 -> if f_ok xor r_ok then 2
+		     else if countAna >= NOF_TICKS_ANOMALY then 1
+		     else pre(alarm);
+	ok = alarm=0 -> true;
+--%PROPERTY ok;
+tel
+
+node AlarmDecrease(fr,fa,rr,ra:bool) returns (alarm:int; f_ok,r_ok: bool ; ok:bool);
+var
+	countAna: int;
+	isFrontFail, isRearFail: bool;
+let
+  	countAna = 0 -> if fa or ra then pre(countAna) + 1
+			else pre(countAna);
+	(isFrontFail, isRearFail) = FailureDetector(fr,rr);
+	f_ok = true -> if isFrontFail then false
+			else pre f_ok;
+	r_ok = true -> if isRearFail then false
+			else pre r_ok;
+	alarm = 0 -> if f_ok xor r_ok then 2
+		     else if countAna >= NOF_TICKS_ANOMALY then 1
+		     else pre(alarm);
+	ok = true -> if pre(alarm)=2 and (alarm=1 or alarm=0) then false
+		     else if pre(alarm)=1 and alarm=0 then false
+		     else true;
+		      
+--%PROPERTY ok;
+tel
+
+node AlarmEitherForRfail(fr,fa,rr,ra:bool) returns (alarm:int; f_ok,r_ok: bool ; ok:bool);
+var
+	countAna: int;
+	isFrontFail, isRearFail: bool;
+let
+  	countAna = 0 -> if fa or ra then pre(countAna) + 1
+			else pre(countAna);
+	(isFrontFail, isRearFail) = FailureDetector(fr,rr);
+	f_ok = true -> if isFrontFail then false
+			else pre f_ok;
+	r_ok = true -> if isRearFail then false
+			else pre r_ok;
+	alarm = 0 -> if f_ok xor r_ok then 2
+		     else if countAna >= NOF_TICKS_ANOMALY then 1
+		     else pre(alarm);
+	ok = true -> if (f_ok xor r_ok) and (alarm=0 or alarm=1) then false
+		     else true; 
+		      
+--%PROPERTY ok;
+tel
+
+node Verify_AlarmTask1(fr,fa,rr,ra:bool) returns (alarm:int; f_ok,r_ok: bool);
+var
+	countAna: int;
+	isFrontFail, isRearFail: bool;
+	ok: bool;
+let
+  	countAna = 0 -> if fa or ra then pre(countAna) + 1
+			else pre(countAna);
+	(isFrontFail, isRearFail) = FailureDetector(fr,rr);
+	f_ok = true -> if isFrontFail then false
+			else pre f_ok;
+	r_ok = true -> if isRearFail then false
+			else pre r_ok;
+	alarm = 0 -> if f_ok xor r_ok then 2
+		     else if countAna >= NOF_TICKS_ANOMALY then 1
+		     else pre(alarm);
+	ok = not (alarm = 2);
+--%PROPERTY ok;
+tel
+
+node Verify_AlarmTask2(fr,fa,rr,ra:bool) returns (alarm:int; f_ok,r_ok: bool);
+var
+	countAna: int;
+	isFrontFail, isRearFail: bool;
+	ok: bool;
+let
+  	countAna = 0 -> if fa or ra then pre(countAna) + 1
+			else pre(countAna);
+	(isFrontFail, isRearFail) = FailureDetector(fr,rr);
+	f_ok = true -> if isFrontFail then false
+			else pre f_ok;
+	r_ok = true -> if isRearFail then false
+			else pre r_ok;
+	alarm = 0 -> if f_ok xor r_ok then 2
+		     else if countAna >= 10 then 1
+		     else pre(alarm);
+	ok = not (alarm = 1);
+--%PROPERTY ok;
+tel
+---------------------------------------------------------------------
+-- IMPLEMENT ME
+-- TASK L4
+node NaiveSpeedometer(rev:bool; tick:bool) returns (speed:real; update:bool);
+var
+  count: real;
+  checkSpeed: bool;
+let
+  count = 0.0 -> if tick then pre(count) + 1.0
+               else if pre update then 0.0
+               else pre(count);
+  checkSpeed = false -> if rev then true
+                   else pre(checkSpeed);
+  speed = 0.0 -> if rev and pre(checkSpeed) then 1.9/(pre(count)*0.01)
+                 else pre(speed);
+  update = false -> if rev and pre(checkSpeed) then true
+		    else false;
+tel
+
+
+---------------------------------------------------------------------
+-- IMPLEMENT ME
+-- TASK L5
+node Speedometer(fr,rr,f_ok,r_ok,tick:bool) returns (speed:real);
+var
+	speedFront, speedRear: real;
+	updateFront, updateRear: bool;
+let
+	(speedFront, updateFront) = NaiveSpeedometer(fr, tick);
+	(speedRear, updateRear) = NaiveSpeedometer(rr, tick);
+	speed = 0.0 -> if (f_ok and r_ok) and updateRear then speedRear
+			else if (f_ok and r_ok) and updateFront then speedFront
+			else if not f_ok then speedRear
+			else if not r_ok then speedFront
+			else pre(speed);
+tel
+
+node Verify_SpeedometerTask1(fr,rr,f_ok,r_ok,tick:bool) returns (speed:real; ok:bool);
+var
+	speedFront, speedRear: real;
+	updateFront, updateRear: bool;
+let
+	(speedFront, updateFront) = NaiveSpeedometer(fr, tick);
+	(speedRear, updateRear) = NaiveSpeedometer(rr, tick);
+	speed = 0.0 -> if (f_ok and r_ok) and updateRear then speedRear
+			else if (f_ok and r_ok) and updateFront then speedFront
+			else if not f_ok then speedRear
+			else if not r_ok then speedFront
+			else pre(speed);
+	ok = (speed=0.0 -> true);
+--%PROPERTY ok;
+tel
+
+node Verify_SpeedometerTask2(fr,rr,f_ok,r_ok,tick:bool) returns (speed:real; ok:bool);
+var
+	speedFront, speedRear: real;
+	updateFront, updateRear: bool;
+let
+	(speedFront, updateFront) = NaiveSpeedometer(fr, tick);
+	(speedRear, updateRear) = NaiveSpeedometer(rr, tick);
+	speed = 0.0 -> if (f_ok and r_ok) and updateRear then speedRear
+			else if (f_ok and r_ok) and updateFront then speedFront
+			else if not f_ok then speedRear
+			else if not r_ok then speedFront
+			else pre(speed);
+	ok = true -> if updateRear and not rr then false 
+		    else if updateFront and not fr then false
+		    else pre(ok);
+--%PROPERTY ok;
+tel
+---------------------------------------------------------------------
+-- IMPLEMENT ME
+-- TASK L6
+node Assist(h:real; speed:real; battery:int; brake:bool; alarm:int)
+  returns (assist:real);
+let
+  assist = 0.0 -> if alarm=2 or speed>MAX_SPEED or brake or battery=0 then 0.0
+                else if battery > 20 then h
+                else h/2.0;
+tel
+
+
+---------------------------------------------------------------------
+-- This is a controller that connects everything together.
+-- TASK L7 (add a property and verify it)
+node Controller(fm,rm,tick,brake:bool; h:real; battery:int)
+  returns (assist:real;alarm:int;speed:real);
+var
+  f_ok:bool;
+  r_ok:bool;
+  fr,fa:bool;
+  rr,ra:bool;
+let
+  (fr,fa) = RevA(fm,tick);
+  (rr,ra) = RevA(rm,tick);
+  (alarm, f_ok, r_ok) = Alarm(fr,fa, rr,ra);
+  speed = Speedometer(fr, rr, f_ok, r_ok, tick);
+  assist = Assist(h, speed, battery, brake, alarm);
+tel
+
+node Verify_Controller(fm,rm,tick,brake:bool; h:real; battery:int)
+  returns (assist:real;alarm:int;speed:real;ok:bool);
+var
+  f_ok:bool;
+  r_ok:bool;
+  fr,fa:bool;
+  rr,ra:bool;
+let
+  (fr,fa) = RevA(fm,tick);
+  (rr,ra) = RevA(rm,tick);
+  (alarm, f_ok, r_ok) = Alarm(fr,fa, rr,ra);
+  speed = Speedometer(fr, rr, f_ok, r_ok, tick);
+  assist = Assist(h, speed, battery, brake, alarm);
+	ok = if (speed > MAX_SPEED) and (assist<>0.0) then false 
+	     else true;
+--%PROPERTY ok;
+tel

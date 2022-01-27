@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+int State=0;</declaration>
+	<template>
+		<name>Sensor</name>
+		<parameter>chan &amp;press,chan &amp;release, int &amp;longPress, bool &amp;status, int &amp;alarm</parameter>
+		<declaration>clock y;
+int NumberPress = 0;</declaration>
+		<location id="id0" x="-263" y="-221" color="#000000">
+			<name x="-255" y="-255">ButtonPressStart</name>
+		</location>
+		<location id="id1" x="399" y="25" color="#000000">
+		</location>
+		<location id="id2" x="637" y="144" color="#000000">
+			<name x="653" y="136">VerifyOffOrBL</name>
+		</location>
+		<location id="id3" x="-59" y="-153" color="#000000">
+			<name x="-102" y="-187">ReleaseVerifyOnOrOff</name>
+		</location>
+		<location id="id4" x="314" y="-161" color="#00ffff">
+			<urgent/>
+		</location>
+		<location id="id5" x="629" y="-161" color="#ff00ff">
+			<name x="637" y="-185">BL</name>
+		</location>
+		<location id="id6" x="221" y="-85" color="#ff00ff">
+			<name x="221" y="-119">CS</name>
+		</location>
+		<location id="id7" x="68" y="-85" color="#00ff00">
+			<name x="68" y="-76">ON</name>
+			<urgent/>
+		</location>
+		<location id="id8" x="-399" y="-153" color="#ff0000">
+			<name x="-409" y="-183">OFF</name>
+		</location>
+		<location id="id9" x="-527" y="-102" color="#000000">
+		</location>
+		<location id="id10" x="-527" y="0" color="#ffa500">
+			<name x="-629" y="-25">AlarmReset</name>
+		</location>
+		<location id="id11" x="-433" y="0" color="#000000">
+		</location>
+		<init ref="id8"/>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id8"/>
+			<label kind="synchronisation" x="-484" y="-59">release?</label>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id11"/>
+			<label kind="synchronisation" x="-501" y="8">press?</label>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="-595" y="-76">release?</label>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-586" y="-144">alarm==2</label>
+			<label kind="synchronisation" x="-510" y="-144">press?</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id6"/>
+			<label kind="guard" x="93" y="-161">NumberPress==1 
+&amp;&amp; y&lt;50</label>
+			<label kind="assignment" x="102" y="-178">NumberPress:=0</label>
+			<nail x="154" y="-91"/>
+			<nail x="163" y="-125"/>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-586" y="-221">NumberPress==1 &amp;&amp;
+ y&lt;50 &amp;&amp; alarm != 2</label>
+			<label kind="assignment" x="-586" y="-238">NumberPress:=0</label>
+			<nail x="-458" y="-142"/>
+			<nail x="-449" y="-184"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id6"/>
+			<label kind="guard" x="442" y="-59">longPress==2</label>
+			<label kind="assignment" x="416" y="-76">State:=2,NumberPress:=0,y:=0</label>
+			<nail x="408" y="-68"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-263" y="-170">longPress==2</label>
+			<label kind="assignment" x="-306" y="-153">State:=0, NumberPress:=0,y:=0</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id5"/>
+			<label kind="guard" x="629" y="-229">y&lt;200 &amp;&amp; status==false</label>
+			<nail x="653" y="-209"/>
+			<nail x="677" y="-177"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-331" y="-59">NumberPress == 0 &amp;&amp;
+longPress == false</label>
+			<label kind="assignment" x="-348" y="-76">NumberPress:=1,State:=0,y:=0</label>
+			<nail x="-221" y="-76"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id6"/>
+			<label kind="guard" x="119" y="51">NumberPress == 0 &amp;&amp;
+longPress == false</label>
+			<label kind="assignment" x="119" y="34">NumberPress:=1</label>
+			<nail x="348" y="85"/>
+			<nail x="255" y="34"/>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-212" y="-238">release?</label>
+			<label kind="assignment" x="-212" y="-221">State:=4</label>
+			<nail x="-119" y="-221"/>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-382" y="-212">alarm!=2</label>
+			<label kind="synchronisation" x="-331" y="-195">press?</label>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="442" y="76">release?</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="297" y="-17">press?</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-42" y="119">longPress == 1</label>
+			<label kind="assignment" x="-119" y="136">status:=false,y:=0,NumberPress:=0,State:=0,y:=0</label>
+			<nail x="127" y="136"/>
+			<nail x="-399" y="144"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id5"/>
+			<label kind="guard" x="637" y="-25">longPress == 0 &amp;&amp; 
+NumberPress == 1</label>
+			<label kind="assignment" x="637" y="-51">y:=0,State:=3</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-102" y="-59">longPress == 1 &amp;&amp; alarm != 2 
+&amp;&amp; NumberPress&lt;2 
+&amp;&amp; status==false</label>
+			<label kind="assignment" x="-102" y="-76">status:=true,State:=1</label>
+			<nail x="-59" y="-85"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id5"/>
+			<label kind="guard" x="0" y="-297">longPress == 0 &amp;&amp; NumberPress==1</label>
+			<label kind="assignment" x="59" y="-314">y:=0,State:=3</label>
+			<nail x="-59" y="-297"/>
+			<nail x="255" y="-297"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id5"/>
+			<label kind="guard" x="629" y="-127">y&lt;500 &amp;&amp; status==true</label>
+			<nail x="645" y="-121"/>
+			<nail x="669" y="-137"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-136" y="-365">status==false &amp;&amp; y &gt;= 200</label>
+			<label kind="assignment" x="76" y="-365">NumberPress:=0,State:=0,y:=0</label>
+			<nail x="629" y="-255"/>
+			<nail x="629" y="-348"/>
+			<nail x="-399" y="-348"/>
+			<nail x="-400" y="-144"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id6"/>
+			<label kind="assignment" x="280" y="-127">y:=0, NumberPress:=0, State:=2</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id4"/>
+			<label kind="guard" x="416" y="-178">y&gt;=500 &amp;&amp; 
+status==true</label>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="assignment" x="8" y="-221">y:=0 , NumberPress:=0,State:=2</label>
+			<nail x="68" y="-204"/>
+			<nail x="221" y="-204"/>
+		</transition>
+	</template>
+	<template>
+		<name>BA</name>
+		<parameter>chan &amp;press, chan &amp;release, int &amp;longPress, bool &amp;status, int &amp;alarm</parameter>
+		<declaration>clock x,total;</declaration>
+		<location id="id12" x="-80" y="64" color="#ff00ff">
+			<name x="-152" y="80">Long_Press</name>
+			<urgent/>
+		</location>
+		<location id="id13" x="-80" y="-104" color="#0000ff">
+			<name x="-90" y="-134">Short_Press</name>
+			<urgent/>
+		</location>
+		<location id="id14" x="-80" y="-24" color="#000000">
+			<name x="-68" y="-42">Verify</name>
+		</location>
+		<location id="id15" x="-484" y="-161" color="#00ff00">
+			<name x="-552" y="-195">SecondRelease</name>
+			<label kind="comments" x="-807" y="-221">If 2 concecative press is done within 15 sec then just reset the alarm to 0</label>
+		</location>
+		<location id="id16" x="-714" y="-161" color="#00ff00">
+			<name x="-816" y="-186">SecondPress</name>
+			<label kind="comments" x="-263" y="-204">button press within 5 sec for the radius of 15 sec</label>
+		</location>
+		<location id="id17" x="-714" y="-17" color="#ffa500">
+			<name x="-794" y="-25">FirstPress</name>
+			<label kind="comments" x="-705" y="127">Being in the radius of 15 sec with 2 consecative 5 sec
+ button press.</label>
+		</location>
+		<location id="id18" x="-304" y="-24" color="#ff0000">
+			<name x="-314" y="-54">IDLE</name>
+			<label kind="comments" x="-306" y="110">Here the x value is 0  and from here it would be taking
+ decicions on which path to take depends on the status
+ value if the Bike is ON and the alarm is 2 then firstly our
+ task is to reset it. Else we will just identify the long press 
+and the short press.</label>
+		</location>
+		<location id="id19" x="127" y="-25" color="#ffff00">
+			<name x="117" y="-59">OtherSeq</name>
+			<urgent/>
+		</location>
+		<location id="id20" x="-323" y="-161" color="#ffa500">
+			<name x="-333" y="-195">Reset</name>
+		</location>
+		<location id="id21" x="-331" y="110" color="#ffff00">
+			<name x="-416" y="76">FIrstNotTrue</name>
+		</location>
+		<location id="id22" x="-501" y="-85" color="#ffff00">
+			<name x="-535" y="-119">DropCondition</name>
+		</location>
+		<branchpoint id="id23" x="-85" y="-25">
+		</branchpoint>
+		<init ref="id18"/>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id18"/>
+			<label kind="guard" x="-416" y="-127">total&gt;1500</label>
+			<label kind="synchronisation" x="-399" y="-110">release!</label>
+		</transition>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id18"/>
+		</transition>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id21"/>
+			<label kind="guard" x="-637" y="93">total&gt;1500 &amp;&amp; x &gt;= 500</label>
+			<label kind="synchronisation" x="-578" y="110">release!</label>
+			<nail x="-714" y="110"/>
+		</transition>
+		<transition>
+			<source ref="id22"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="-493" y="-68">release!</label>
+		</transition>
+		<transition>
+			<source ref="id16"/>
+			<target ref="id22"/>
+			<label kind="guard" x="-654" y="-102">total&gt;1500 &amp;&amp;
+x&gt;500</label>
+			<label kind="synchronisation" x="-637" y="-119">press!</label>
+		</transition>
+		<transition>
+			<source ref="id20"/>
+			<target ref="id18"/>
+			<label kind="assignment" x="-314" y="-136">alarm:=0</label>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id20"/>
+			<label kind="guard" x="-433" y="-204">x&lt;=500 &amp;&amp; 
+total&lt;=1500</label>
+			<label kind="synchronisation" x="-416" y="-161">release!</label>
+		</transition>
+		<transition>
+			<source ref="id19"/>
+			<target ref="id18"/>
+			<nail x="144" y="-25"/>
+			<nail x="144" y="110"/>
+			<nail x="-306" y="110"/>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="8" y="-42">release!</label>
+			<label kind="assignment" x="-8" y="-25">longPress:=2</label>
+		</transition>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id18"/>
+			<nail x="-304" y="64"/>
+		</transition>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id18"/>
+			<nail x="-304" y="-104"/>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id13"/>
+			<label kind="guard" x="-59" y="-93">x &gt;=0 and x&lt;=50</label>
+			<label kind="synchronisation" x="-56" y="-80">release!</label>
+			<label kind="assignment" x="-56" y="-112">longPress:=0</label>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-64" y="48">x&gt;=100 and x &lt; 500</label>
+			<label kind="synchronisation" x="25" y="68">release!</label>
+			<label kind="assignment" x="-68" y="68">longPress:=1</label>
+		</transition>
+		<transition>
+			<source ref="id18"/>
+			<target ref="id14"/>
+			<label kind="guard" x="-224" y="-48">alarm != 2</label>
+			<label kind="synchronisation" x="-232" y="-24">press!</label>
+			<label kind="assignment" x="-176" y="-24">x:=0</label>
+		</transition>
+		<transition>
+			<source ref="id16"/>
+			<target ref="id15"/>
+			<label kind="guard" x="-680" y="-178">total&lt;=1500</label>
+			<label kind="synchronisation" x="-586" y="-178">press!</label>
+			<label kind="assignment" x="-620" y="-161">x:=0</label>
+		</transition>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id16"/>
+			<label kind="guard" x="-807" y="-102">x&lt;=500 &amp;&amp;
+total&lt;=1500</label>
+			<label kind="synchronisation" x="-773" y="-68">release!</label>
+		</transition>
+		<transition>
+			<source ref="id18"/>
+			<target ref="id17"/>
+			<label kind="guard" x="-603" y="0">alarm == 2 &amp;&amp; !status</label>
+			<label kind="synchronisation" x="-501" y="-17">press!</label>
+			<label kind="assignment" x="-603" y="-17">x:=0,total:=0</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+chan press, release;
+int longPress = 0;
+bool status = false;
+int alarm=0;
+User_Model = BA(press, release, longPress, status, alarm);
+Sensor_Model = Sensor(press, release, longPress, status, alarm);
+
+// List one or more processes to be composed into a system.
+system User_Model, Sensor_Model;</system>
+	<queries>
+		<query>
+			<formula>Sensor_Model.alarm == 0 --&gt; Sensor_Model.ON</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>User_Model.VeritfyLongPress --&gt; not Sensor_Model.ON</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Sensor_Model.BL --&gt; Model_User.y &lt; 200</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; (Sensor_Model.BL and Sensor_Model.y&lt;200)</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[] Sensor_Model.OFF</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Sensor_Model.ON</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] (Sensor_Model.ON and Sensor_Model.alarm = 2)</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A&lt;&gt; Sensor_Model.ON</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Sensor_Model.y&gt;=500 and Sensor_Model.BL and not Sensor_Model.status --&gt; Sensor_Model.OFF</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Sensor_Model.alarm == 2 and Sensor_Model.OFF --&gt; not Sensor_Model.ON</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Sensor_Model.alarm == 2  --&gt; not Sensor_Model.ON</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; (Sensor_Model.alarm = 1  and Sensor_Model.ON) </formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[] (Sensor_Model.alarm = 2 and not Sensor_Model.status) </formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[] (Sensor_Model.alarm = 2 and not Sensor_Model.ON)</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Sensor_Model.alarm == 2 and not Sensor_Model.status --&gt; not Sensor_Model.ON</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>User_Model.longPress and Sensor_Model.ON and Sensor_Model.alarm != 2 --&gt; Sensor_Model.status</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>User_Model.longPress==1 and Sensor_Model.status == 1 and Sensor_Model.ReleaseVerifyOnOrOff and Sensor_Model.alarm != 2 --&gt; Sensor_Model.status == 1</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A&lt;&gt; Sensor_Model.ON imply User_Model.Long_Press</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Sensor_Model.OFF and User_Model.press --&gt; Sensor_Model.ButtonPressStart</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>User_Model.Long_Press --&gt; Sensor_Model.ON</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>User_Model.Short_Press or User_Model.OtherSeq --&gt; not Sensor_Model.ON</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Sensor_Model.alarm == 2 and not Sensor_Model.status --&gt; Sensor_Model.OFF</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A&lt;&gt; Sensor_Model.OFF</formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>

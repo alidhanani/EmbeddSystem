@@ -1,0 +1,31 @@
+// ----------------------------------------------------------
+// Electric Bike: Task 1
+// ----------------------------------------------------------
+
+m:=70; // mass
+k:=0.25; // constant of friction
+max_u:=80; // max force
+low_u:=0; // min force
+max_d:=1.9; // max distance
+low_d:=0; // min distance
+limit_d:=1.9; // target distance
+max_v:=10; // max velocity
+min_v:=0; // min velocity
+limit_v:=125/18; // target velcity
+
+// ----------------------------------------------------------
+// System Description
+// ----------------------------------------------------------
+
+automaton sensor
+contr_var: v, d;
+input_var: u;
+synclabs: stopM, startM, FR;
+loc active: while low_u<=u<=max_u & low_d<=d<=max_d & min_v<=v<max_v wait {d'==v & v'==((2*u)-(k*v))/m}
+	when true sync stopM goto inactive;
+	when d==limit_d sync FR do {d'==0 & v'==v} goto active;
+loc inactive: while low_u<=u<=max_u & low_d<=d<=max_d & min_v<=v<max_v wait {d'==v & v'==((u)-(k*v))/m} 
+	when d==limit_d sync FR do {d'==0 & v'==v} goto inactive;
+	when true sync startM do {d'==d & v'==v} goto active;
+initially: active & v==0 & low_d<=d<=max_d & low_u<=u<=max_u;
+end

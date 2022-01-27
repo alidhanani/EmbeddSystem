@@ -1,0 +1,82 @@
+// ----------------------------------------------------------
+// Electric Bike: Task2
+// ----------------------------------------------------------
+
+ ----------------------------------------------------------
+// Constants 
+// ----------------------------------------------------------
+m:=70; // mass
+k:=0.25; // constant of friction
+//delta:=0.3726; // founded delta
+delta:=1.9*18/125; // provided delta
+max_u:=80; // max force
+low_u:=0; // min force
+max_d:=1.9; // max distance
+low_d:=0; // min distance
+limit_d:=1.9; // target distance
+max_v:=10; // max velocity
+min_v:=0; // min velocity 
+limit_v:=125/18; // target target
+
+//-----------------------------------------------------------
+// System Description
+//-----------------------------------------------------------
+
+automaton sensor
+contr_var: v, d;
+input_var: u;
+synclabs: stopM, startM, FR, isError;
+loc active: while low_u<=u<=max_u & low_d<=d<=max_d & min_v<=v<max_v wait {d'==v & v'==((2*u)-(k*v))/m}
+	when true sync stopM goto inactive;
+	when d==limit_d sync FR do {d'==0 & v'==v} goto active;
+	when v>=limit_v sync isError do {d'==d & v'==v} goto error;
+loc inactive: while low_u<=u<=max_u & low_d<=d<=max_d & min_v<=v<max_v wait {d'==v & v'==((u)-(k*v))/m} 
+	when d==limit_d sync FR do {d'==0 & v'==v} goto inactive;
+	when true sync startM do {d'==d & v'==v} goto active;
+loc error: while limit_v<=v<=max_v wait {true};
+
+initially: active & v==0 & low_d<=d<=max_d & low_u<=u<=max_u;
+end
+
+automaton motor
+contr_var: x;
+synclabs: FR, startM, stopM;
+loc init: while true wait {true}
+	  when true sync FR do {x'==0} goto on;
+loc on: while true wait {x'==1}
+	when x>=delta sync FR do {x'==0} goto on;
+	when x<delta sync FR do {x'==0} goto stop;
+loc stop: while x<=0 wait {true}
+	when true sync stopM goto off;
+loc off: while true wait {x'==1}
+	when x<delta sync FR do {x'==0} goto off;
+	when x>=delta sync FR do {x'==0} goto start;
+loc start: while x<=0 wait {true}
+	when true sync startM goto on;
+initially: init & x==0;
+end
+
+comp_aut = sensor & motor;
+
+// ----------------------------------------------------------
+// Define Condition Work
+// ----------------------------------------------------------
+comp_aut.add_label(tau);
+
+comp_aut.set_refine_constraints((v, 0.1),tau);
+
+
+reg=comp_aut.reachable;
+mystate=comp_aut.{active~$ & v>=125/18}; // condition to check
+//reg.contains(mystate);
+reg.intersection_assign(mystate);
+reg.is_empty;
+
+// ----------------------------------------------------------
+// Saving Data for Graphical Output
+// ----------------------------------------------------------
+reg.project_to(d,v); // remove x to get a 2-dim output
+reg.print("out_reach",2); // output as a list of vertices
+
+// for display with graph use
+//    graph -T X -C -B -q0.5 out_reach
